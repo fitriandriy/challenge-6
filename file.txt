@@ -1,0 +1,3 @@
+## LINK DOMAIN DEPLOYMENT
+- Dev Domain: https://challenge-6-develop.up.railway.app 
+- Prod Domain: https://challenge-6-production.up.railway.app 

@@ -23,7 +23,7 @@ module.exports = {
     "username": DB_USERNAME,
     "password": DB_PASSWORD,
     "dialect": DB_DIALECT,
-    "port": DB_PORT
+    "port": 5432
   },
   "production": {
     "host": DB_HOST,

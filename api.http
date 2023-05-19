@@ -1,0 +1,171 @@
+// COMPONENTS
+
+###
+GET http://localhost:8000/components
+
+###
+GET http://localhost:8000/components/4
+
+###
+POST http://localhost:8000/components
+Content-Type: application/json
+
+{
+  "name": "lcd light",
+  "description": "20 inch"
+}
+
+###
+PUT http://localhost:8000/components/2
+Content-Type: application/json
+
+{
+  "name": "keyboard",
+  "description": "21 inch"
+}
+
+###
+DELETE http://localhost:8000/components/3
+
+
+
+
+
+// PRODUCTS
+
+###
+GET http://localhost:8000/products
+
+###
+GET http://localhost:8000/products/2
+
+###
+POST http://localhost:8000/products
+Content-Type: application/json
+
+{
+  "name": "Lenovo A 123+",
+  "quantity": 10,
+  "component_id": 3
+}
+
+###
+PUT http://localhost:8000/products/4
+Content-Type: application/json
+
+{
+    "quantity": 10
+}
+
+###
+DELETE http://localhost:8000/products/3
+
+
+
+
+
+// SUPPLIERS
+
+###
+GET http://localhost:8000/suppliers
+
+###
+GET http://localhost:8000/suppliers/1
+
+###
+POST http://localhost:8000/suppliers
+Content-Type: application/json
+
+{
+  "name": "Dream Company",
+  "address": "Jember"
+}
+
+###
+PUT http://localhost:8000/suppliers/1
+Content-Type: application/json
+
+{
+  "address": "Banyuwangi, jawa timur, 68468"
+}
+
+###
+DELETE http://localhost:8000/suppliers/2
+
+
+
+
+
+// component_product
+
+###
+GET http://localhost:8000/components
+###
+GET http://localhost:8000/products
+
+###
+GET http://localhost:8000/component_products
+
+###
+GET http://localhost:8000/component_products/1
+
+###
+POST http://localhost:8000/component_products
+Content-Type: application/json
+
+{
+  "product_id": 2,
+  "component_id": 1
+}
+
+###
+// wajib isi kedua properti
+PUT http://localhost:8000/component_products/1
+Content-Type: application/json
+
+{
+  "product_id": 1,
+  "component_id": 2
+}
+
+###
+DELETE http://localhost:8000/component_products/2
+
+
+
+
+
+// component_supplier
+###
+GET http://localhost:8000/components
+###
+GET http://localhost:8000/suppliers
+
+###
+GET http://localhost:8000/component_suppliers
+
+###
+GET http://localhost:8000/component_suppliers/1
+
+###
+POST http://localhost:8000/component_suppliers
+Content-Type: application/json
+
+{
+  "supplier_id": 1,
+  "component_id": 2
+}
+
+###
+// wajib isi kedua properti
+
+PUT http://localhost:8000/component_suppliers/1
+Content-Type: application/json
+
+{
+  "supplier_id": 2,
+  "component_id": 1
+}
+
+###
+DELETE http://localhost:8000/component_suppliers/1

@@ -1,0 +1,1505 @@
+openapi: 3.0.0
+info:
+  title: Manufaktur 1.0
+  description: |-
+    Dokumentasi API ini menyediakan informasi mengenai cara mendapatkan data dari database Manufaktur. Tidak ada proses authentikasi dan authorisasi yang diperlukan. Pengguna dapat secara langsung mengirimkan request sesuai prosedur yang dijelaskan.
+  contact:
+    email: 202410102062@mail.unej.id
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Test di dalam local computer
+tags:
+  - name: Products
+    description: Berisi data detail product
+  - name: Components
+    description: Berisi data detail component
+  - name: Suppliers
+    description: Berisi data suppliers
+  - name: Component_products
+    description: Berisi data component yang digunakan dalam produk
+  - name: Component_suppliers
+    description: Berisi data suppliers beserta component yang disupply
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Mendapatkan semua data product
+      description: Mendapatkan semua data product dengan detail tiap datanya meliputi id, name, quantity, createdAt, dan updatedAt
+      operationId: get-products
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: Lenovo
+                        quantity:
+                          type: integer
+                          example: 10
+                        createdAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+                        updatedAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+        "404":
+          description: Alamat endpoint tidak ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 404 Not Found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                  data:
+                    type: object
+    post:
+      tags:
+        - Products
+      summary: Mengirim data product
+      description: |-
+        Semua attribut di dalam body request wajib diisi, yakni name, quantity, dan component_id.
+        Saat mengirimkan data product, maka data pada tabel Component_product juga akan dibuat dengan isi data yakni product_id dan component_id, dengan catatan bahwa component yang dimaksud tersedia di dalam database Components.
+      operationId: post-products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Laptop ASUS
+                quantity:
+                  type: integer
+                  example: 10
+                component_id:
+                  type: integer
+                  example: 2
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: Lenovo
+                      quantity:
+                        type: integer
+                        example: 10
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "400":
+          description: Name pada request body sudah tersedia pada database Products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Product Notebook already exist.
+        "404":
+          description: Component dengan id yang dimaksud tidak tersedia dalam database Component
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Component with id 8 doesn't exist.
+  /products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Mendapatkan detail data product
+      description: Mendapatkan detail data product berdasarkan id pada request parameter. Dengan detail data meliputi id, name, quantity, createdAt, dan updatedAt
+      operationId: get-product-by-id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data product
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: Lenovo
+                      quantity:
+                        type: integer
+                        example: 10
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "404":
+          description: Product dengan id yang dimaksud tidak tersedia dalam database Products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: data not found.
+                  data:
+                    example: null
+    put:
+      tags:
+        - Products
+      summary: Mengedit data product
+      description: |-
+        Pengguna dapat mengubah data name dan quantity dengan mengisikan data salah satu atau keduanya ke dalam request body. Tidak boleh ada duplikasi nama pada database Products.
+      operationId: put-product
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Laptop ASUS
+                quantity:
+                  type: integer
+                  example: 10
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: integer
+                      example: 1
+        "400":
+          description: Name pada request body sudah tersedia pada database Products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Product Notebook already exist.
+        "404":
+          description: Product dengan id yang dimaksud tidak tersedia dalam database Products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Product with id 8 is not found.
+                  data:
+                    example: null
+    delete:
+      tags:
+        - Products
+      summary: Menghapus data product
+      description: |-
+        Pengguna dapat menghapus data berdasarkan id product yang ada pada request parameter.
+      operationId: delete-product
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data product
+      responses:
+        "200":
+          description: Product berhasil dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: integer
+                    example: 1
+        "404":
+          description: Product dengan id yang dimaksud tidak tersedia dalam database Products.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Product with id 8 is not found.
+                  data:
+                    type: integer
+                    example: 0
+  /components:
+    get:
+      tags:
+        - Components
+      summary: Mendapatkan semua data pada database Components
+      description: Mendapatkan semua data component dengan detail tiap datanya meliputi id, name, description, createdAt, dan updatedAt
+      operationId: get-components
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: Mouse
+                        description:
+                          type: string
+                          example: Mouse berwarna merah, kuning, hijauh dan wireless
+                        createdAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+                        updatedAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+    post:
+      tags:
+        - Components
+      summary: Mengirim data component
+      description: |-
+        Semua attribut di dalam body request wajib diisi, yakni name dan description. Tidak boleh ada duplikat data attribute name pada database Components.
+      operationId: post-component
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Mouse
+                description:
+                  type: string
+                  example: 20 inch
+      responses:
+        "201":
+          description: Data berhasil tersimpan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: Lenovo
+                      description:
+                        type: string
+                        example: 20 inch
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "400":
+          description: Name pada request body sudah tersedia pada database Components
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Data already exist.
+  /components/{id}:
+    get:
+      tags:
+        - Components
+      summary: Mendapatkan detail data pada database Components
+      description: Mendapatkan detail data component dengan attribute tiap datanya meliputi id, name, description, createdAt, dan updatedAt
+      operationId: get-component-by-id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data component
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: Mouse
+                      description:
+                        type: string
+                        example: Mouse berwarna merah, kuning, hijauh dan wireless
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "404":
+          description: Component dengan id yang dimaksud tidak tersedia dalam database Components
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: data not found.
+                  data:
+                    example: null
+    put:
+      tags:
+        - Components
+      summary: Mengedit data component
+      description: |-
+        Pengguna dapat mengubah data name dan description dengan mengisikan salah satu data atau keduanya ke dalam request body. Tidak boleh ada duplikasi name pada database Components.
+      operationId: put-component
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data component
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Mouse
+                description:
+                  type: string
+                  example: wireless
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: integer
+                      example: 1
+        "400":
+          description: Name pada request body sudah tersedia pada database Components.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Product Mouse already exist.
+        "404":
+          description: Component dengan id yang dimaksud tidak tersedia dalam database Components
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Component with id 8 is not found.
+                  data:
+                    example: null
+    delete:
+      tags:
+        - Components
+      summary: Menghapus data component
+      description: |-
+        Pengguna dapat menghapus data berdasarkan id component yang ada pada request parameter.
+      operationId: delete-component
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data component
+      responses:
+        "200":
+          description: Component berhasil dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: integer
+                    example: 1
+        "404":
+          description: Component dengan id yang dimaksud tidak tersedia dalam database Products.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Component with id 8 is not found.
+                  data:
+                    type: integer
+                    example: 0
+  /suppliers:
+    get:
+      tags:
+        - Suppliers
+      summary: Mendapatkan semua data pada database Suppliers
+      description: Mendapatkan semua data supplier dengan detail tiap datanya meliputi id, name, address, createdAt, dan updatedAt
+      operationId: get-suppliers
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: PT Astra
+                        address:
+                          type: string
+                          example: Sempu, Banyuwangi
+                        createdAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+                        updatedAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+    post:
+      tags:
+        - Suppliers
+      summary: Mengirim data supplier
+      description: |-
+        Semua attribut di dalam body request wajib diisi, yakni name dan address. Tidak boleh ada duplikat data attribute name pada database Suppliers.
+      operationId: post-suppliers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: PT Astra
+                address:
+                  type: string
+                  example: Sempu, Banyuwangi
+      responses:
+        "201":
+          description: Data berhasil tersimpan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: Dream Company
+                      address:
+                        type: string
+                        example: Jember
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "400":
+          description: Name pada request body sudah tersedia pada database Suppliers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Data already exist.
+  /suppliers/{id}:
+    get:
+      tags:
+        - Suppliers
+      summary: Mendapatkan detail data pada database Suppliers
+      description: Mendapatkan detail data supplier dengan attribute tiap datanya meliputi id, name, address, createdAt, dan updatedAt
+      operationId: get-supplier-by-id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data supplier
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: PT Astra
+                      address:
+                        type: string
+                        example: Jember
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "404":
+          description: Supplier dengan id yang dimaksud tidak tersedia dalam database Suppliers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: data not found.
+                  data:
+                    example: null
+    put:
+      tags:
+        - Suppliers
+      summary: Mengedit data supplier
+      description: |-
+        Pengguna dapat mengubah data name dan address dengan mengisikan salah satu data atau keduanya ke dalam request body. Tidak boleh ada duplikasi name pada database Suppliers.
+      operationId: put-supplier
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data supplier
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: PT Astra
+                address:
+                  type: string
+                  example: Jember
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: integer
+                      example: 1
+        "400":
+          description: Name pada request body sudah tersedia pada database Suppliers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Supplier PT Astra already exist.
+        "404":
+          description: Supplier dengan id yang dimaksud tidak tersedia dalam database Suppliers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Supplier with id 8 is not found.
+                  data:
+                    example: null
+    delete:
+      tags:
+        - Suppliers
+      summary: Menghapus data supplier
+      description: |-
+        Pengguna dapat menghapus data berdasarkan id supplier yang ada pada request parameter.
+      operationId: delete-supplier
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data supplier
+      responses:
+        "200":
+          description: Supplier berhasil dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: integer
+                    example: 1
+        "404":
+          description: Supplier dengan id yang dimaksud tidak tersedia dalam database Suppliers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Supplier with id 8 is not found.
+                  data:
+                    type: integer
+                    example: 0
+  /component_products:
+    get:
+      tags:
+        - Component_products
+      summary: Mendapatkan semua data pada database Component_products
+      description: Mendapatkan semua data component_product dengan detail tiap datanya meliputi product_id, component_id, createdAt, dan updatedAt
+      operationId: get-component_product
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        product_id:
+                          type: integer
+                          example: 1
+                        component_id:
+                          type: integer
+                          example: 1
+                        createdAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+                        updatedAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+    post:
+      tags:
+        - Component_products
+      summary: Mengirim data component_product
+      description: |-
+        Semua attribut di dalam body request wajib diisi, yakni product_id dan component_id. Tidak boleh ada duplikat data attribute pada database Component_products.
+      operationId: post-component_product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: integer
+                  example: 1
+                component_id:
+                  type: integer
+                  example: 1
+      responses:
+        "201":
+          description: Data berhasil tersimpan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      product_id:
+                        type: integer
+                        example: 1
+                      component_id:
+                        type: integer
+                        example: 1
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "400":
+          description: Component_product pada request body sudah tersedia pada database Component_products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Data already exist.
+        "404":
+          description: Data product atau component yang dimaksud tidak tersedia.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Data already exist.
+  /component_products/{id}:
+    get:
+      tags:
+        - Component_products
+      summary: Mendapatkan detail data pada database Component_products
+      description: Mendapatkan detail data component_product dengan attribute tiap datanya meliputi product_id, component_id, createdAt, dan updatedAt
+      operationId: get-component_product-by-id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data component_product
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      product_id:
+                        type: integer
+                        example: 1
+                      component_id:
+                        type: integer
+                        example: 1
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "404":
+          description: Component_product dengan id yang dimaksud tidak tersedia dalam database Component_products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: data not found.
+                  data:
+                    example: null
+    put:
+      tags:
+        - Component_products
+      summary: Mengedit data component_product
+      description: |-
+        Pengguna dapat mengubah data product_id dan component_id dengan mengisikan salah satu data atau keduanya ke dalam request body. Tidak boleh ada duplikasi data pada database Component_products.
+      operationId: put-component_products
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data component_product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: integer
+                  example: 1
+                component_id:
+                  type: integer
+                  example: 1
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: integer
+                      example: 1
+        "400":
+          description: Data pada request body sudah tersedia pada database Component_products.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: data already exists..
+        "404":
+          description: Component_product dengan id yang dimaksud tidak tersedia dalam database Component_products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Component_product with id 8 is not found.
+                  data:
+                    example: null
+    delete:
+      tags:
+        - Component_products
+      summary: Menghapus data Component_product
+      description: |-
+        Pengguna dapat menghapus data berdasarkan id Component_product yang ada pada request parameter.
+      operationId: delete-component_product
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data component_product
+      responses:
+        "200":
+          description: Component_product berhasil dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: integer
+                    example: 1
+        "404":
+          description: Component_product dengan id yang dimaksud tidak tersedia dalam database Component_products.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Component_product with id 8 is not found.
+                  data:
+                    type: integer
+                    example: 0
+  /component_suppliers:
+    get:
+      tags:
+        - Component_suppliers
+      summary: Mendapatkan semua data pada database Component_suppliers
+      description: Mendapatkan semua data component_supplier dengan detail tiap datanya meliputi supplier_id, component_id, createdAt, dan updatedAt
+      operationId: get-component_suppliers
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        supplier_id:
+                          type: integer
+                          example: 1
+                        component_id:
+                          type: integer
+                          example: 1
+                        createdAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+                        updatedAt:
+                          type: string
+                          example: 2023-05-05T11:22:33.725Z
+    post:
+      tags:
+        - Component_suppliers
+      summary: Mengirim data component_supplier
+      description: |-
+        Semua attribut di dalam body request wajib diisi, yakni supplier_id dan component_id. Tidak boleh ada duplikat data attribute pada database Component_suppliers.
+      operationId: post-component_supplier
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                supplier_id:
+                  type: integer
+                  example: 1
+                component_id:
+                  type: integer
+                  example: 1
+      responses:
+        "201":
+          description: Data berhasil tersimpan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      supplier_id:
+                        type: integer
+                        example: 1
+                      component_id:
+                        type: integer
+                        example: 1
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "400":
+          description: Component_supplier pada request body sudah tersedia pada database Component_suppliers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Data already exist.
+        "404":
+          description: Data supplier atau component yang dimaksud tidak tersedia.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Data already exist.
+  /component_suppliers/{id}:
+    get:
+      tags:
+        - Component_suppliers
+      summary: Mendapatkan detail data pada database Component_suppliers
+      description: Mendapatkan detail data component_supplier dengan attribute tiap datanya meliputi supplier_id, component_id, createdAt, dan updatedAt
+      operationId: get-component_supplier-by-id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data component_supplier
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      supplier_id:
+                        type: integer
+                        example: 1
+                      component_id:
+                        type: integer
+                        example: 1
+                      createdAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+                      updatedAt:
+                        type: string
+                        example: 2023-05-05T11:22:33.725Z
+        "404":
+          description: Component_supplier dengan id yang dimaksud tidak tersedia dalam database Component_suppliers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: data not found.
+                  data:
+                    example: null
+    put:
+      tags:
+        - Component_suppliers
+      summary: Mengedit data component_supplier
+      description: |-
+        Pengguna dapat mengubah data supplier_id dan component_id dengan mengisikan salah satu data atau keduanya ke dalam request body. Tidak boleh ada duplikasi data pada database Component_suppliers.
+      operationId: put-component_suppliers
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data component_supplier
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                supplier_id:
+                  type: integer
+                  example: 1
+                component_id:
+                  type: integer
+                  example: 1
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: integer
+                      example: 1
+        "400":
+          description: Data pada request body sudah tersedia pada database Component_suppliers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: data already exists..
+        "404":
+          description: Component_supplier dengan id yang dimaksud tidak tersedia dalam database Component_suppliers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Component_supplier with id 8 is not found.
+                  data:
+                    example: null
+    delete:
+      tags:
+        - Component_suppliers
+      summary: Menghapus data Component_supplier
+      description: |-
+        Pengguna dapat menghapus data berdasarkan id Component_supplier yang ada pada request parameter.
+      operationId: delete-component_supplier
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: id dari data component_supplier
+      responses:
+        "200":
+          description: Component_supplier berhasil dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: integer
+                    example: 1
+        "404":
+          description: Component_supplier dengan id yang dimaksud tidak tersedia dalam database Component_suppliers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Component_supplier with id 8 is not found.
+                  data:
+                    type: integer
+                    example: 0
+      
+      
+      

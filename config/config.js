@@ -1,33 +1,36 @@
 require('dotenv').config();
 const {
-  PGDATABASE,
-  PGUSER,
-  PGPASSWORD,
-  PGHOST,
-  DIALEC,
+  DB_HOST,
+  DB_NAME,
+  DB_USERNAME,
+  DB_PASSWORD,
+  DB_PORT = 5432,
+  DB_DIALECT = 'postgres'
 } = process.env;
 
-module.exports =  {
+module.exports = {
   "development": {
-    "username": PGUSER,
-    "password": PGPASSWORD,
-    "database": PGDATABASE,
-    "host": PGHOST,
-    "dialect": DIALEC,
-    "logginh": false
+    "host": DB_HOST,
+    "database": DB_NAME,
+    "username": DB_USERNAME,
+    "password": DB_PASSWORD,
+    "dialect": DB_DIALECT,
+    "port": DB_PORT
   },
   "test": {
-    "username": PGUSER,
-    "password": PGPASSWORD,
-    "database": PGDATABASE,
-    "host": PGHOST,
-    "dialect": DIALEC
+    "host": DB_HOST,
+    "database": DB_NAME,
+    "username": DB_USERNAME,
+    "password": DB_PASSWORD,
+    "dialect": DB_DIALECT,
+    "port": DB_PORT
   },
   "production": {
-    "username": PGUSER,
-    "password": PGPASSWORD,
-    "database": PGDATABASE,
-    "host": PGHOST,
-    "dialect": DIALEC
+    "host": DB_HOST,
+    "database": DB_NAME,
+    "username": DB_USERNAME,
+    "password": DB_PASSWORD,
+    "dialect": DB_DIALECT,
+    "port": DB_PORT
   }
-}
+};

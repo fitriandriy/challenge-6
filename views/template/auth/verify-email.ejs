@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Email Verification</title>
+  </head>
+
+  <body>
+    <!-- display message -->
+    <% if(message){ %>
+    <p>Message: <%= message %></p>
+    <% } %>
+
+    <h2>Reset Password :</h2>
+    <form action="/auth/account-status?email=<%= email %>" method="POST">
+      <label>Klik tombol submit untuk verifikasi akun</label>
+      <br>
+      <input type="submit" />
+    </form>
+  </body>
+</html>

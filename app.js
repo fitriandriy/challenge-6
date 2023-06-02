@@ -1,18 +1,18 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yaml');
 const fs = require('fs');
 const app = express();
-const {
-  HTTP_PORT = 8000
-} = process.env;
 
 const file = fs.readFileSync('./docs.yaml', 'utf8');
 const swaggerDocument = YAML.parse(file);
 
 app.use(cors());
 app.use(express.json());
+app.use('/images', express.static('public/images'));
+app.set('view engine', 'ejs');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const router = require('./routes');
